@@ -1032,6 +1032,12 @@ func (f *filesystemCreator) createPartition(ctx android.LoadHookContext, partiti
 	fsProps, supported := generateFsProps(ctx, partitions, partition.partitionType)
 	if !supported {
 		partition.supported = false
+		// The image itself falls back to the legacy Make path (e.g. squashfs vendor),
+		// but other generated modules such as recovery-prop.default still depend on
+		// the vendor build.prop module, so create it anyway.
+		if partition.partitionType == "vendor" {
+			f.createVendorBuildProp(ctx)
+		}
 		return
 	}
 
